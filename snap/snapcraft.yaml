@@ -1,10 +1,11 @@
-name: steam
+name: heroic
 summary: Launcher for the Steam software distribution service
 description: |
   Steam is a software distribution service with an online store, automated
   installation, automatic updates, achievements, SteamCloud synchronized
   savegame and screenshot functionality, and many social features.
-adopt-info: steam
+adopt-info: heroic
+version: 2.15.2
 grade: stable
 confinement: strict
 architectures:
@@ -25,6 +26,12 @@ lint:
         - usr/lib32/**
 
 package-repositories:
+  # - type: apt
+  #   url: http://archive.ubuntu.com/ubuntu
+  #   suites: [jammy]
+  #   components: [main, universe]
+  #   architectures: [i386]
+  #   key-id: F6ECB3762474EDA9D21B7022871920D1991BC93C
   - type: apt
     url: http://repo.steampowered.com/steam/
     suites: [stable]
@@ -97,6 +104,7 @@ plugs:
     write:
       - $HOME/.local/share/Steam
       - $HOME/Steam
+      - $HOME/.steam
   dot-local-share-applications:
     interface: personal-files
     write:
@@ -111,11 +119,11 @@ plugs:
     interface: shared-memory
     private: true
 
-slots:
-  steam:
-    interface: dbus
-    bus: session
-    name: com.steampowered.PressureVessel.LaunchAlongsideSteam
+# slots:
+#   steam:
+#     interface: dbus
+#     bus: session
+#     name: com.steampowered.PressureVessel.LaunchAlongsideSteam
 
 hooks:
   configure:
@@ -129,7 +137,10 @@ environment:
 parts:
   launcher:
     plugin: nil
-    source: ./src
+    source: ./src 
+    override-pull: |
+      craftctl default
+      dpkg --add-architecture i386
     override-build: |
       mkdir -p $CRAFT_PART_INSTALL/bin
       cp * $CRAFT_PART_INSTALL/bin/
@@ -181,6 +192,7 @@ parts:
     plugin: dump
     source: https://github.com/diddlesnaps/snapcraft-alsa.git
     source-subdir: snapcraft-assets
+    source-depth: 1
     build-packages:
       - libasound2-dev
     stage-packages:
@@ -238,6 +250,7 @@ parts:
     plugin: nil
     source: https://github.com/mesonbuild/meson.git
     source-tag: "1.4.1"
+    source-depth: 1
     override-build: |
       python3 -m pip install .
       mkdir -p $CRAFT_PART_INSTALL/usr/lib/python3/dist-packages
@@ -255,12 +268,11 @@ parts:
     after: [meson-deps]
     source: https://github.com/flightlessmango/MangoHud.git
     source-tag: "v0.7.2"
+    source-depth: 1
     plugin: meson
     organize:
-      snap/steam/current/usr: usr
+      snap/heroic/current/usr: usr
     build-environment:
-      - CC: gcc -m32
-      - CXX: g++ -m32
       - PKG_CONFIG_PATH: /usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig
     meson-parameters:
       - --prefix=/usr
@@ -280,9 +292,7 @@ parts:
       - libxnvctrl-dev
       - mesa-common-dev
       - python3-mako
-      - libwayland-dev:i386
       - libwayland-dev
-      - libxkbcommon-dev:i386
       - libxkbcommon-dev
     # Fixes the $LIB being escaped for some reason
     override-build: |
@@ -293,9 +303,10 @@ parts:
     after: [meson-deps, mangohud]
     source: https://github.com/flightlessmango/MangoHud.git
     source-tag: "v0.7.2"
+    source-depth: 1
     plugin: meson
     organize:
-      snap/steam/current/usr: usr
+      snap/heroic/current/usr: usr
     meson-parameters:
       - --prefix=/usr
       - --libdir=lib/x86_64-linux-gnu
@@ -303,6 +314,7 @@ parts:
     stage:
       - -usr/bin/mangohud
       - -usr/share/vulkan/implicit_layer.d/MangoHud.json
+      - -usr/share/vulkan/implicit_layer.d/MangoHud.x86_64.json
       - -usr/share/vulkan/implicit_layer.d/libMangoApp.json
       - -usr/share/doc/mangohud/MangoHud.conf.example
       - -usr/share/man/man1/mangohud.1 
@@ -313,7 +325,7 @@ parts:
     source-branch: "add-snap-support"
     plugin: meson
     organize:
-      snap/steam/current/usr: usr
+      snap/heroic/current/usr: usr
     meson-parameters:
       - --prefix=/usr
     build-packages:
@@ -340,21 +352,26 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/tests
       cp -rp * $CRAFT_PART_INSTALL/tests/
 
-  steam-devices:
-    plugin: dump
-    source: https://github.com/ValveSoftware/steam-devices.git
+  # steam-devices:
+  #   plugin: dump
+  #   source: https://github.com/ValveSoftware/steam-devices.git
 
-  steam:
-    plugin: nil
-    #source: http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
+  heroic:
+    after: [launcher]
+    source: .
+    plugin: dump 
     build-packages:
       - dpkg-dev
       - dirmngr # Needed for launchpad builds
     stage-packages:
-      - steam-launcher
-      - steam-libs-amd64
-      - steam-libs-i386
       - libappindicator3-1
+      - libgtk-3-0
+      - libpangoxft-1.0-0
+      - libsasl2-2
+      - libasound2
+      - libnspr4
+      - libnss3
+      - libcurl4
       - libxcb-dri3-0:amd64
       - libxcb-dri3-0:i386
       - libpci3
@@ -368,6 +385,7 @@ parts:
       - zlib1g:amd64
       - xdg-utils
       - xdg-user-dirs
+      - xz-utils
       - fontconfig-config
       - fontconfig:i386
       - fontconfig:amd64
@@ -381,10 +399,6 @@ parts:
       - libxss1:amd64
       - libxss1:i386
       - x11-xserver-utils
-    override-build: |
-      craftctl default
-      # Set the snap version from the .deb package version
-      craftctl set version=$(dpkg-parsechangelog -l $CRAFT_PART_INSTALL/usr/share/doc/steam-launcher/changelog.all.gz -S Version | sed -e s/1://g)
     prime:
       - -usr/share/doc
       - -usr/share/man
@@ -402,26 +416,29 @@ parts:
       - -usr/lib/*/libVk*
       - -usr/lib/*/libLLVM*
     build-snaps: [core22]
+    override-pull: |
+      craftctl default
+      dpkg -x $CRAFT_PROJECT_DIR/snap/heroic_*.deb $CRAFT_PART_SRC
     override-prime: |
       set -eux
       craftctl default
       cp -a /snap/core22/current/usr/lib/i386-linux-gnu/* usr/lib/i386-linux-gnu/
 
-  yaru-skin:
-    plugin: nil
-    source: https://github.com/ubuntu/yaru-for-steam.git
-    source-type: git
-    stage-packages:
-      - fonts-ubuntu
-    override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/usr/share/Steam/skins
-      ./install.py -t $CRAFT_PART_INSTALL/usr/share/Steam/skins -w full -n Yaru
-    prime:
-      - usr/share/fonts/truetype/ubuntu
-      - usr/share/Steam/skins
+  # yaru-skin:
+  #   plugin: nil
+  #   source: https://github.com/ubuntu/yaru-for-steam.git
+  #   source-type: git
+  #   stage-packages:
+  #     - fonts-ubuntu
+  #   override-build: |
+  #     mkdir -p $CRAFT_PART_INSTALL/usr/share/Steam/skins
+  #     ./install.py -t $CRAFT_PART_INSTALL/usr/share/Steam/skins -w full -n Yaru
+  #   prime:
+  #     - usr/share/fonts/truetype/ubuntu
+  #     - usr/share/Steam/skins
 
   conditioning:
-    after: [steam]
+    after: [heroic]
     plugin: nil
     build-packages:
       - shared-mime-info
@@ -437,7 +454,7 @@ parts:
       done
 
   cleanup:
-    after: [steam, conditioning]
+    after: [heroic, conditioning]
     plugin: nil
     build-snaps:
       - gaming-graphics-core22/kisak-fresh/candidate
@@ -449,9 +466,9 @@ parts:
       find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
 
 apps:
-  steam:
+  heroic:
     command-chain: [snap/command-chain/alsa-launch, bin/desktop-launch]
-    command: usr/lib/steam/bin_steam.sh -no-cef-sandbox
+    command: opt/Heroic/heroic --no-sandbox
     environment:
       HOME: $SNAP_USER_COMMON
       #LIBGL_DEBUG: verbose
@@ -479,6 +496,7 @@ apps:
       - audio-playback
       - audio-record
       - screen-inhibit-control
+      - kernel-module-control
       - process-control
       - bluez
       - network-control
@@ -487,51 +505,51 @@ apps:
       - removable-media
       - upower-observe
       - uinput
-  report:
-    command-chain: [bin/desktop-launch]
-    command: bin/steamreport
-    environment:
-      DISABLE_WAYLAND: 1
-      PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
-      GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
-    plugs:
-      - system-observe
-      - hardware-observe
-      - opengl
-      - x11
-      - desktop
-  vulkaninfo:
-    command-chain: [bin/desktop-launch]
-    command: bin/vulkaninfo
-    plugs:
-      - opengl
-      - x11
-      - desktop
-  vkcube:
-    command-chain: [bin/desktop-launch]
-    command: bin/vkcube
-    plugs:
-      - opengl
-      - x11
-      - desktop
-  glxinfo:
-    command-chain: [bin/desktop-launch]
-    command: bin/glxinfo
-    plugs:
-      - opengl
-      - x11
-      - desktop
-  glxgears:
-    command-chain: [bin/desktop-launch]
-    command: bin/glxgears
-    plugs:
-      - opengl
-      - x11
-      - desktop
-  test:
-    command-chain: [bin/desktop-launch]
-    command: tests/run.sh
-    plugs:
-      - opengl
-      - x11
-      - desktop
+  # report:
+  #   command-chain: [bin/desktop-launch]
+  #   command: bin/steamreport
+  #   environment:
+  #     DISABLE_WAYLAND: 1
+  #     PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
+  #     GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
+  #   plugs:
+  #     - system-observe
+  #     - hardware-observe
+  #     - opengl
+  #     - x11
+  #     - desktop
+  # vulkaninfo:
+  #   command-chain: [bin/desktop-launch]
+  #   command: bin/vulkaninfo
+  #   plugs:
+  #     - opengl
+  #     - x11
+  #     - desktop
+  # vkcube:
+  #   command-chain: [bin/desktop-launch]
+  #   command: bin/vkcube
+  #   plugs:
+  #     - opengl
+  #     - x11
+  #     - desktop
+  # glxinfo:
+  #   command-chain: [bin/desktop-launch]
+  #   command: bin/glxinfo
+  #   plugs:
+  #     - opengl
+  #     - x11
+  #     - desktop
+  # glxgears:
+  #   command-chain: [bin/desktop-launch]
+  #   command: bin/glxgears
+  #   plugs:
+  #     - opengl
+  #     - x11
+  #     - desktop
+  # test:
+  #   command-chain: [bin/desktop-launch]
+  #   command: tests/run.sh
+  #   plugs:
+  #     - opengl
+  #     - x11
+  #     - desktop
