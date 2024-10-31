@@ -9,7 +9,7 @@ START=$(date +%s.%N)
 if ! snapctl is-connected "gaming-mesa"; then
   echo "ERROR: not connected to the gaming-mesa content interface."
   echo "To connect:"
-  echo "sudo snap connect steam:gaming-mesa gaming-graphics-core22"
+  echo "sudo snap connect heroic:gaming-mesa gaming-graphics-core22"
   exit 1
 fi
 
@@ -172,6 +172,7 @@ export LIBGL_DRIVERS_PATH="$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/dri"
 append_dir LIBGL_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/x86_64-linux-gnu/dri"
 append_dir LIBGL_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/graphics/usr/lib/$ARCH/dri"
 append_dir LIBGL_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/graphics/usr/lib/x86_64-linux-gnu/dri"
+append_dir LIBGL_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/graphics/usr/lib/i386-linux-gnu/dri"
 append_dir LD_LIBRARY_PATH "$LIBGL_DRIVERS_PATH"
 
 append_dir LIBVA_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/dri"
@@ -227,9 +228,10 @@ prepend_dir XDG_DATA_DIRS "$SNAP/usr/share"
 prepend_dir XDG_DATA_DIRS "$SNAP/share"
 prepend_dir XDG_DATA_DIRS "$SNAP/data-dir"
 prepend_dir XDG_DATA_DIRS "$SNAP_USER_DATA"
+append_dir XDG_DATA_DIRS "$SNAP/graphics/usr/share"
 
 # Set XDG_DATA_HOME to local path
-# steam snap
+# heroic snap
 export XDG_DATA_HOME="$SNAP_USER_COMMON/.local/share"
 ensure_dir_exists "$XDG_DATA_HOME"
 
@@ -317,10 +319,6 @@ append_dir GTK_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/gtk-3.0"
 
 wait_for_async_execs
 
-# Copy the yaru into place so it's available at runtime
-ensure_dir_exists "$XDG_DATA_HOME/Steam/skins"
-cp -rp $SNAP/usr/share/Steam/skins/Yaru $XDG_DATA_HOME/Steam/skins/
-
 if [ -n "$SNAP_DESKTOP_DEBUG" ]; then
   echo "desktop-launch elapsed time: $(date +%s.%N --date="$START seconds ago")"
   echo "Now running: exec $*"
@@ -330,11 +328,11 @@ fi
 # The default works on a system with only the Snap installed, but if they also
 # have the deb then the default command will run the deb instead of the Snap.
 find "$SNAP_USER_COMMON/.local/share/applications" -type f | while read -r file; do
-  sed -i "s/Exec=steam/Exec=snap run steam/" "$file"
+  sed -i "s/Exec=heroic/Exec=snap run heroic/" "$file"
 done
 
 # Links game icons to host
-find "$SNAP_USER_COMMON/.local/share/icons/hicolor" -type f -name "steam_icon_*.png" | while read -r file; do
+find "$SNAP_USER_COMMON/.local/share/icons/hicolor" -type f -name "heroic_icon_*.png" | while read -r file; do
   dest="${file/$SNAP_USER_COMMON/$REALHOME}"
   ensure_dir_exists "$(dirname $dest)"
   ln -sf "$file" "$dest"
@@ -356,4 +354,3 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 
 $SNAP/bin/nvidia32 &
 "$@"
-killall steam-runtime-launcher-service

@@ -26,22 +26,14 @@ lint:
         - usr/lib32/**
 
 package-repositories:
-  # - type: apt
-  #   url: http://archive.ubuntu.com/ubuntu
-  #   suites: [jammy]
-  #   components: [main, universe]
-  #   architectures: [i386]
-  #   key-id: F6ECB3762474EDA9D21B7022871920D1991BC93C
   - type: apt
-    url: http://repo.steampowered.com/steam/
-    suites: [stable]
-    components: [steam]
+    components: [main]
+    suites: [jammy]
     architectures: [amd64, i386]
-    key-id: BA1816EF8E75005FCF5E27A1F24AEA9FB05498B7
+    key-id: 9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280
+    url: https://deb.nodesource.com/node_20.x 
 
 layout:
-  /usr/lib/steam:
-    bind: $SNAP/usr/lib/steam
   /usr/share/zenity:
     bind: $SNAP/usr/share/zenity
   # https://discourse.ubuntu.com/t/the-graphics-core20-snap-interface/23000
@@ -55,34 +47,38 @@ layout:
     bind: $SNAP/usr/share/alsa
   /usr/share/X11/xkb:
     bind: $SNAP/usr/share/X11/xkb
-  /usr/lib/x86_64-linux-gnu/libvulkan_intel.so:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_intel.so
-  /usr/lib/i386-linux-gnu/libvulkan_intel.so:
-    symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_intel.so
-  /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
-  /usr/lib/i386-linux-gnu/libvulkan_lvp.so:
-    symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_lvp.so
-  /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_radeon.so
-  /usr/lib/i386-linux-gnu/libvulkan_radeon.so:
-    symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_radeon.so
-  /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0
-  /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0
-  /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
-  /usr/lib/x86_64-linux-gnu/libxcb.so:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
-  /usr/lib/x86_64-linux-gnu/libxcb.so.1:
-    symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+  # /usr/lib/x86_64-linux-gnu/libvulkan_intel.so:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_intel.so
+  # /usr/lib/i386-linux-gnu/libvulkan_intel.so:
+  #   symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_intel.so
+  # /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+  # /usr/lib/i386-linux-gnu/libvulkan_lvp.so:
+  #   symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_lvp.so
+  # /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libvulkan_radeon.so
+  # /usr/lib/i386-linux-gnu/libvulkan_radeon.so:
+  #   symlink: $SNAP/graphics/usr/lib/i386-linux-gnu/libvulkan_radeon.so
+  # /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0
+  # /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.0.0
+  # /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+  # /usr/lib/x86_64-linux-gnu/libxcb.so:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+  # /usr/lib/x86_64-linux-gnu/libxcb.so.1:
+  #   symlink: $SNAP/graphics/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
   /etc/ld.so.cache:
     bind-file: $SNAP_DATA/etc/ld.so.cache
   /etc/fonts:
     bind: $SNAP/etc/fonts
 
 plugs:
+  # gnome-42-2204:
+  #   interface: content
+  #   target: $SNAP/gnome-platform
+  #   default-provider: gnome-42-2204
   gaming-mesa:
     interface: content
     target: $SNAP/graphics
@@ -104,7 +100,7 @@ plugs:
     write:
       - $HOME/.local/share/Steam
       - $HOME/Steam
-      - $HOME/.steam
+      - $HOME/snap/steam/common/.steam
   dot-local-share-applications:
     interface: personal-files
     write:
@@ -131,16 +127,14 @@ hooks:
       - opengl
 
 environment:
-  LD_LIBRARY_PATH: $SNAP/graphics/lib/i386-linux-gnu:$SNAP/graphics/usr/lib:$SNAP/usr/lib/i386-linux-gnu:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/lib/i386-linux-gnu:$SNAP/usr/lib/i386-linux-gnu/pulseaudio${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  #LD_LIBRARY_PATH: $SNAP/graphics/lib/i386-linux-gnu:$SNAP/graphics/usr/lib:$SNAP/usr/lib/i386-linux-gnu:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/lib/i386-linux-gnu:$SNAP/usr/lib/i386-linux-gnu/pulseaudio:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
   LIBGL_DRIVERS_PATH: $SNAP/graphics/usr/lib/i386-linux-gnu/dri:$SNAP/graphics/usr/lib/x86_64-linux-gnu/dri:${LIBGL_DRIVERS_PATH:+:$LIBGL_DRIVERS_PATH}
 
 parts:
   launcher:
+    after: [heroic]
     plugin: nil
     source: ./src 
-    override-pull: |
-      craftctl default
-      dpkg --add-architecture i386
     override-build: |
       mkdir -p $CRAFT_PART_INSTALL/bin
       cp * $CRAFT_PART_INSTALL/bin/
@@ -187,44 +181,53 @@ parts:
       - usr/**/libwebp*
       - usr/**/libxcb-render*
       - usr/**/libxkbcommon*
+    prime:
+      - -etc/dconf
+      - -etc/gtk*
+      - -etc/init*
+      - -etc/ld*
+      - -etc/vulkan
+      - -etc/X11
+      - -etc/xdg
 
-  alsa-mixin:
-    plugin: dump
-    source: https://github.com/diddlesnaps/snapcraft-alsa.git
-    source-subdir: snapcraft-assets
-    source-depth: 1
-    build-packages:
-      - libasound2-dev
-    stage-packages:
-      - libasound2
-      - libasound2-plugins
-      - yad
-    stage:
-      # restrict to only audio-related files - you need to ensure
-      # that gtk3 is staged for yad to work correctly, to prompt
-      # users to connect the alsa plug or proceed with pulseaudio.
-      #
-      # This helps prevent symbol conflicts in situations where
-      # you're using a non-default library, such as those that the
-      # gnome-3-34 extension for core18 provides.
-      - etc/asound.conf
-      - snap/command-chain/alsa-launch
-      - usr/bin/yad*
-      - usr/lib/*/alsa-lib
-      - usr/lib/*/libasound*
-      - usr/lib/*/libasyncns*
-      - usr/lib/*/libdnsfile*
-      - usr/lib/*/libFLAC*
-      - usr/lib/*/libjack*
-      - usr/lib/*/libpulse*
-      - usr/lib/*/libsamplerate*
-      - usr/lib/*/libsndfile*
-      - usr/lib/*/libspeex*
-      - usr/lib/*/libvorbis*
-      - usr/lib/*/pulseaudio
-      - usr/share/alsa
+  # alsa-mixin:
+  #   plugin: dump
+  #   source: https://github.com/diddlesnaps/snapcraft-alsa.git
+  #   source-subdir: snapcraft-assets
+  #   source-depth: 1
+  #   build-packages:
+  #     - libasound2-dev
+  #   stage-packages:
+  #     - libasound2
+  #     - libasound2-plugins
+  #     - yad
+  #   stage:
+  #     # restrict to only audio-related files - you need to ensure
+  #     # that gtk3 is staged for yad to work correctly, to prompt
+  #     # users to connect the alsa plug or proceed with pulseaudio.
+  #     #
+  #     # This helps prevent symbol conflicts in situations where
+  #     # you're using a non-default library, such as those that the
+  #     # gnome-3-34 extension for core18 provides.
+  #     - etc/asound.conf
+  #     - snap/command-chain/alsa-launch
+  #     - usr/bin/yad*
+  #     - usr/lib/*/alsa-lib
+  #     - usr/lib/*/libasound*
+  #     - usr/lib/*/libasyncns*
+  #     - usr/lib/*/libdnsfile*
+  #     - usr/lib/*/libFLAC*
+  #     - usr/lib/*/libjack*
+  #     - usr/lib/*/libpulse*
+  #     - usr/lib/*/libsamplerate*
+  #     - usr/lib/*/libsndfile*
+  #     - usr/lib/*/libspeex*
+  #     - usr/lib/*/libvorbis*
+  #     - usr/lib/*/pulseaudio
+  #     - usr/share/alsa
 
   ninja:
+    after: [heroic]
     plugin: nil
     source: https://github.com/ninja-build/ninja.git
     source-tag: "v1.12.1"
@@ -321,8 +324,9 @@ parts:
 
   gamemode:
     after: [meson-deps]
-    source: https://github.com/ashuntu/gamemode.git
-    source-branch: "add-snap-support"
+    source: https://github.com/FeralInteractive/gamemode.git
+    source-tag: "1.8.2"
+    source-depth: 1
     plugin: meson
     organize:
       snap/heroic/current/usr: usr
@@ -345,24 +349,71 @@ parts:
       - usr/lib/*/libjq.so*
       - usr/lib/*/libonig.so*
 
-  tests:
-    plugin: dump
-    source: tests
-    override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/tests
-      cp -rp * $CRAFT_PART_INSTALL/tests/
+  # tests:
+  #   plugin: dump
+  #   source: tests
+  #   override-build: |
+  #     mkdir -p $CRAFT_PART_INSTALL/tests
+  #     cp -rp * $CRAFT_PART_INSTALL/tests/
 
   # steam-devices:
   #   plugin: dump
   #   source: https://github.com/ValveSoftware/steam-devices.git
 
   heroic:
-    after: [launcher]
-    source: .
-    plugin: dump 
+    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher.git
+    source-tag: 'v2.15.2'
+    source-depth: 1
+    plugin: dump
     build-packages:
       - dpkg-dev
-      - dirmngr # Needed for launchpad builds
+      - nodejs
+      #- dirmngr # Needed for launchpad builds 
+    prime:
+      - -chrome-*
+      - -chrome_crashpad_handler
+      - -usr/share/doc
+      - -usr/share/man
+      - -usr/share/bug
+      - -usr/share/gdb
+      - -usr/share/emacs*
+      - -usr/share/lintian
+      - -usr/share/drirc.d
+      - -usr/share/vulkan
+      - -usr/share/Xsession.d
+      - -usr/lib/*/dri
+      - -usr/lib/*/vdpau
+      - -usr/lib/*/libvkd3d*
+      - -usr/lib/*/libvulkan*
+      - -usr/lib/*/libVk*
+      - -usr/lib/*/libLLVM*
+    override-build: |
+      set -eux
+      patch -p1 < $CRAFT_PROJECT_DIR/dist.patch
+      if [[ -n "${http_proxy:-}" ]]; then
+        export HTTP_PROXY="${http_proxy:-}"
+        export HTTPS_PROXY="${http_proxy:-}"
+        export ELECTRON_GET_USE_PROXY=1
+        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy:-}"
+        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy:-}"
+      fi
+      npm config set -g registry https://registry.npmjs.org/
+      npm config set -g proxy "${http_proxy:-}"
+      npm config set -g https-proxy "${http_proxy:-}"
+      npm install -g pnpm
+      pnpm config set -g registry https://github.com/
+      pnpm config set -g proxy "${http_proxy:-}"
+      pnpm config set -g https-proxy "${http_proxy:-}"
+      pnpm config set -g registry https://registry.npmjs.org/
+      pnpm config set -g proxy "${http_proxy:-}"
+      pnpm config set -g https-proxy "${http_proxy:-}"
+      pnpm install
+      pnpm run download-helper-binaries
+      pnpm dist:linux --dir
+      cp -a dist/linux-unpacked/* $CRAFT_PART_INSTALL/
+
+  debs:
+    plugin: nil
     stage-packages:
       - libappindicator3-1
       - libgtk-3-0
@@ -391,7 +442,6 @@ parts:
       - fontconfig:amd64
       - pciutils
       - lsof
-      - locales-all
       - usbutils # Allows finding controllers etc
       - psmisc
       - libfuse2:amd64
@@ -400,45 +450,37 @@ parts:
       - libxss1:i386
       - x11-xserver-utils
     prime:
-      - -usr/share/doc
+      - -etc/dconf
+      - -etc/gtk*
+      - -etc/init*
+      - -etc/ld*
+      - -etc/vulkan
+      - -etc/X11
+      - -etc/xdg
+      - -usr/bin/cpp*
+      - -usr/bin/X11
+      - -usr/bin/browse
+      - -usr/bin/x86*
+      - -usr/bin/iceauth
+      - -usr/include
+      - -usr/lib/gcc
+      - -usr/lib/systemd
+      - -usr/lib/X11
+      - -usr/sbin
+      - -usr/share/doc*
       - -usr/share/man
       - -usr/share/bug
-      - -usr/share/gdb
-      - -usr/share/emacs*
+      - -usr/share/apport
+      - -usr/share/gcc
       - -usr/share/lintian
-      - -usr/share/drirc.d
-      - -usr/share/vulkan
-      - -usr/share/Xsession.d
-      - -usr/lib/*/dri
-      - -usr/lib/*/vdpau
-      - -usr/lib/*/libvkd3d*
-      - -usr/lib/*/libvulkan*
-      - -usr/lib/*/libVk*
-      - -usr/lib/*/libLLVM*
-    build-snaps: [core22]
-    override-pull: |
-      craftctl default
-      dpkg -x $CRAFT_PROJECT_DIR/snap/heroic_*.deb $CRAFT_PART_SRC
-    override-prime: |
-      set -eux
-      craftctl default
-      cp -a /snap/core22/current/usr/lib/i386-linux-gnu/* usr/lib/i386-linux-gnu/
+      - -usr/share/libthai
+      - -usr/share/pkgconfig
+      - -usr/share/themes
+      - -usr/libexec
 
-  # yaru-skin:
-  #   plugin: nil
-  #   source: https://github.com/ubuntu/yaru-for-steam.git
-  #   source-type: git
-  #   stage-packages:
-  #     - fonts-ubuntu
-  #   override-build: |
-  #     mkdir -p $CRAFT_PART_INSTALL/usr/share/Steam/skins
-  #     ./install.py -t $CRAFT_PART_INSTALL/usr/share/Steam/skins -w full -n Yaru
-  #   prime:
-  #     - usr/share/fonts/truetype/ubuntu
-  #     - usr/share/Steam/skins
 
   conditioning:
-    after: [heroic]
+    after: [heroic, debs]
     plugin: nil
     build-packages:
       - shared-mime-info
@@ -446,7 +488,6 @@ parts:
     override-prime: |
       set -eux
       craftctl default
-      update-mime-database usr/share/mime
       for dir in usr/share/icons/*; do
         if [ -f "$dir/index.theme" ]; then
           gtk-update-icon-cache --force "$dir"
@@ -461,21 +502,22 @@ parts:
     override-prime: |
       set -eux
       cd /snap/gaming-graphics-core22/current/usr/lib
-      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      find . -type f,l -exec rm -rf $CRAFT_PRIME/usr/lib/{} \;
       cd /snap/gaming-graphics-core22/current/usr/share
-      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
+      find . -type f,l -exec rm -rf $CRAFT_PRIME/usr/share/{} \;
+      for snap in "core22"; do
+        cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
+      done
 
 apps:
   heroic:
-    command-chain: [snap/command-chain/alsa-launch, bin/desktop-launch]
-    command: opt/Heroic/heroic --no-sandbox
+    command-chain: [bin/desktop-launch]
+    command: heroic --no-sandbox
     environment:
       HOME: $SNAP_USER_COMMON
-      #LIBGL_DEBUG: verbose
+      LIBGL_DEBUG: verbose
       TMPDIR: $XDG_RUNTIME_DIR
       ALWAYS_USE_PULSEAUDIO: 1
-      DISABLE_WAYLAND: 1
-      PKG_CONFIG_PATH: $SNAP/usr/lib/i386-linux-gnu/pkgconfig:$SNAP/usr/lib/x86_64-linux-gnu/pkgconfig:$SNAP/usr/lib/pkgconfig
       PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
       GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
     plugs:
